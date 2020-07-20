@@ -11,7 +11,13 @@ import (
 //定义api接口数据结构和序列化json字段
 
 type News struct {
-	Timestamp uint   `json:"timestamp"`
+	Code     int               `json:"code"`
+	Message  string            `json:"msg"`
+	Newslist map[string]string `json:"newslist"`
+}
+
+type Newslist struct {
+	Timestamp uint   `json:"ctime"`
 	Source    string `json:"source`
 	Title     string `json:"title"`
 	Body      string `json:"body"`
@@ -23,20 +29,6 @@ type News struct {
 var urls = []string{
 	"http://api.tianapi.com/topnews/index?key=c0ee86b42bacbd31469609cdf56dc75e",
 	"http://api.tianapi.com/generalnews/index?key=c0ee86b42bacbd31469609cdf56dc75e",
-	"https://3g.163.com/touch/reconstruct/article/list/BBM54PGAwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA10TA81wangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA8E6OEOwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA8EE5GMwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BAI67OGGwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA8D4A3Rwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BAI6I0O5wangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BAI6JOD9wangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA8F6ICNwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BAI6RHDKwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BA8FF5PRwangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BDC4QSV3wangning/0-10.html",
-	"https://3g.163.com/touch/reconstruct/article/list/BEO4GINLwangning/0-10.html",
-	"https://3g.163.com/touch/nc/api/video/recommend/Video_Recom/0-10.do?callback=videoList",
 }
 
 func main() {
@@ -59,10 +51,42 @@ func fetch(url string, ch chan<- string) {
 		ch <- fmt.Sprint(err)
 		return
 	}
-	s := News{}
+
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	secs := time.Since(start).Seconds()
-	json.Unmarshal([]byte(body), &s)
+	fmt.Println(<-s)
 	ch <- fmt.Sprintf("%.2fs %s  %s", secs, body, url) //将格式化信息写入通道
+}
+
+func InterfaceMethod() {
+	b := []byte(`{`)
+
+	var f interface{}
+	_ = json.Unmarshal([]byte(b), &f)
+	//err := json.Unmarshal(b, &f)
+
+	m := f.(map[string]interface{})
+
+	for k, v := range m {
+		switch vv := v.(type) {
+		case string:
+			fmt.Println(k, "is string", vv)
+		case int:
+			fmt.Println(k, "is int", vv)
+		case float64:
+			fmt.Println(k, "is float64", vv)
+		case []interface{}:
+			for i, u := range vv {
+				fmt.Println(i, u)
+			}
+		case map[string]interface{}:
+			fmt.Println(k, "is an map[string]string:")
+			for i, u := range vv {
+				fmt.Println(i, u)
+			}
+		default:
+			fmt.Println(k, "is of a type I don't handle")
+		}
+	}
 }
