@@ -5,7 +5,7 @@ Project Develop and Design
 
 TECH: GO<Docker<Kafka<Json<Linux<Git<ElasticSearch<Redis
 
-Step1: Data Access & Unified data Structure
+Step1: Data Access & Unified data Structure & Push data into Kafka
 
 Call APIs from different sources to filter, de-duplicate, aggregate, and select article data, as well as article retrieval, recommendation.
 Achieve data access from different sources, and normalizing the data into a unified format, storing it in the database and pushing it downstream
@@ -29,16 +29,19 @@ type StdNew struct {
 
 
 
-Step2: Data Optimization (Filter Data) 
+Step2: Pull data From Kafka & Deduplicate & Send to Elasticsearch (Filter Data) 
 
-Filtering(such as profanity), de-duplication and marking (keyword extraction, category labeling) of normalized data. Push downstream in batches per hour
-
-
-
+Filtering(such as profanity), de-duplication and marking (keyword extraction, category labeling) of normalized data. Push downstream in batches.
+Used Kafka to produce and consume data. Used Redis to filter data and write data into Elasticsearch, 
 
 
-Step3: Accompliah functions and Display
+
+
+
+Step3: Conncect to Web service and Display
 
 Responsible for implementing back-end interfaces such as article data retrieval, recommendation, and public timeline pull, and design and implement Web pages to display various functions.
+
+accomplish the connection between web service. 
 
 
