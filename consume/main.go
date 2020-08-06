@@ -1,105 +1,18 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/Shopify/sarama"
-	"gopkg.in/jcmturner/gokrb5.v7/config"
 
 	"github.com/olivere/elastic/v7"
 )
 
-// log initial
-type LogConfig struct {
-	kafkaAddr string
-	ESAddr    string
-	LogPath   string
-	LogLevel  string
-	Topic     string
-}
-
-var (
-	logConfig *LogConfig
-)
-
-func initConfig(conftype string, filename string) (err error) {
-	conf, err := config.NewConfig(conftype, filename)
-	if err != nil {
-		fmt.Println("new config faild,err:", err)
-		return
-	}
-
-	logConfig = &LogConfig{}
-	logConfig.LogLevel = conf.String("logs::log_level")
-	if len(logConfig.LogLevel) == 0 {
-		logConfig.LogLevel = "debug"
-	}
-
-	logConfig.LogPath = conf.String("logs::log_path")
-	if len(logConfig.LogPath) == 0 {
-		logConfig.LogPath = "./logs"
-	}
-
-	logConfig.kafkaAddr = conf.String("kafka::server_addr")
-	if len(logConfig.kafkaAddr) == 0 {
-		err = fmt.Errorf("invalid kafka addr err")
-		return
-	}
-
-	logConfig.ESAddr = conf.String("ES::addr")
-	if len(logConfig.ESAddr) == 0 {
-		err = fmt.Errorf("invalid ES addr err")
-		return
-	}
-
-	logConfig.Topic = conf.String("kafka::topic")
-	if len(logConfig.Topic) == 0 {
-		err = fmt.Errorf("invalid topic addr err")
-		return
-	}
-	return
-}
-
-func convertLogLevel(level string) int {
-
-	switch level {
-	case "debug":
-		return logs.LevelDebug
-	case "warn":
-		return logs.LevelWarn
-	case "info":
-		return logs.LevelInfo
-	case "trace":
-		return logs.LevelTrace
-	}
-
-	return logs.LevelDebug
-}
-
-func initLogger(logpath string, logLevel string) (err error) {
-	config := make(map[string]interface{})
-	config["filename"] = logpath
-	config["level"] = convertLogLevel(logLevel)
-
-	configStr, err := json.Marshal(config)
-	if err != nil {
-		fmt.Println("marshal failed,err:", err)
-		return
-	}
-
-	logs.SetLogger(logs.AdapterFile, string(configStr))
-	return
-}
-
-// initial kafka
-type KafkaClient struct {
-	client sarama.Consumer
-	addr   string
-	topic  string
-	wg     sync.WaitGroup
+type Service struct {
+	AccessLogProducer sarama.AsyncProducer
+	Consumer          sarama.Consumer
+	Client            *elastic.Client
 }
 
 var (
@@ -123,28 +36,9 @@ func initKafKa(addr string, topic string) (err error) {
 
 }
 
-type LogMessage struct {
-	App     string
-	Topic   string
-	Message string
-}
-
 var (
 	esClient *elastic.Client
 )
-
-// initial ES
-func initES(addr string) (err error) {
-
-	client, err := elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(addr))
-	if err != nil {
-		fmt.Println("connect es error", err)
-		return
-	}
-	esClient = client
-
-	return
-}
 
 func PullFromKafka() (err error) {
 	partitionList, err := kafkaClient.client.Partitions(kafkaClient.topic)
@@ -186,20 +80,40 @@ func PullFromKafka() (err error) {
 	return
 }
 
-func sendToES(topic string, data []byte) (err error) {
-	msg := &LogMessage{}
-	msg.Topic = topic
-	msg.Message = string(data)
+// initial ES
+func initES(addr string) (err error) {
 
-	_, err = esClient.Index().
-		Index(topic).
-		Type(topic).
-		BodyJson(msg).
-		Do()
+	client, err := elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(addr))
 	if err != nil {
-
+		fmt.Println("connect es error", err)
 		return
 	}
+	esClient = client
 
 	return
+}
+
+func sendToES(body, []byte) error {
+	ctx := context.Backgroud()
+
+	//topic structure need be defined?
+	put, err = esClient.Index().
+		Index(topic).
+		Type(topic).
+		BodyJson(body).
+		Do(ctx)
+	if err != nil {
+
+		panic(err)
+	}
+
+	fmt.Println("Indexed log %s to index %s, type %s\n", put.Id, put.Index, put.Type)
+
+	// index need a structure...
+	_, err = esClient.Flush().Index("").Do(ctx)
+	if err != nil {
+		panic(err)
+
+	}
+	return nil
 }
