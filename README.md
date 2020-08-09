@@ -61,7 +61,7 @@ type StdNew struct {
 
 ### Step2: Data optimization and Organization ###
 
-<img width="275" height= "150" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part2.jpg"/>
+<img width="275" height= "125" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part2.jpg"/>
 
 1 Consume data from Apache Kafka.<br/>
 2 Optimize data, using Redis filtering news to accomplish data deduplication.<br/>
