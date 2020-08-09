@@ -5,6 +5,9 @@
 
 A Go Application combined API service, Apache Kafka, and Elasticsearch,  which handles news synchronization and news retrieval. 
 
+### Technologies ###
+Go/Golang || HTTP Service || Apche Kafka || Redis || Elasticsearch || Linux
+
 
 
 
@@ -38,7 +41,7 @@ Open Sources Example:
 
 ```
 
-'''
+```
 
 Unified Data Structure:
 
@@ -50,8 +53,9 @@ type StdNew struct {
 	URL       string   `json:"url"`
 	Types     []string `json:"types"`
 }
+```
 
-'''
+
 
 
 
@@ -63,7 +67,20 @@ type StdNew struct {
 2 Optimize data, using Redis filtering news to accomplish data deduplication.<br/>
 3 Create the data index and write into Elasticsearch.<br/>
 
+```
+Open Source:
+Content Moderation API: 
+1. Tencent could:                https://cloud.tencent.com/product/tms
+2. Baidu could:                  https://ai.baidu.com/tech/textcensoring
+Others:
+1. jieba:                        https://github.com/fxsjy/jieba 
+2. Sensitive words:              https://github.com/jkiss/sensitive-words
+3. Trie tree with AC automaton:  https://github.com/ChisBread/TrieNAhoCorasick
+4. Tencent Cloud NLP:            https://cloud.tencent.com/product/nlp
+5. simhash:                      https://blog.csdn.net/lengye7/article/details/79789206
 
+
+```
 
 
 
