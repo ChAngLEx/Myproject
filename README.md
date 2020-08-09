@@ -29,8 +29,8 @@ Go/Golang || HTTP Service || Apche Kafka || Redis || Elasticsearch || Linux
 <img width="325" height= "225" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part1.jpg"/>
 
 1 Connect different open news sources with API service.<br/>
-2 Normalizing the data into a unified format. <br/>
-3 Feed data from the Apache Kafka and pushing it downstream.<br/>
+2 Normalizing the data into a unified format. <br\>
+3 Feed data from the Apache Kafka and pushing it downstream.<br\>
 
 ```
 Open Sources Example: 
