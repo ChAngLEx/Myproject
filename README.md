@@ -1,4 +1,8 @@
-### Data Processing Project (Go/Golang) ###
+ Data Processing Project (Go/Golang)
+ ===
+
+
+
 A Go Application combined API service, Apache Kafka, and Elasticsearch,  which handles news synchronization and news retrieval. 
 
 
@@ -6,7 +10,8 @@ A Go Application combined API service, Apache Kafka, and Elasticsearch,  which h
 
 
 ### Process Diagram
-
+<div align=center><img width="625" height="475" src="https://github.com/ChAngLEx/Myproject/blob/master/image/process%20Diagram.jpg"/></div>
+																       
     
 
 
@@ -18,9 +23,11 @@ A Go Application combined API service, Apache Kafka, and Elasticsearch,  which h
 
 ### Step1 ： Data Access and Unified ###
 
-1 Connect different open news sources with API service.
-2 Normalizing the data into a unified format. 
-3 Feed data from the Apache Kafka and pushing it downstream.
+<img width="325" height= "225" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part1.jpg"/>
+
+1 Connect different open news sources with API service.<br/>
+2 Normalizing the data into a unified format. <br/>
+3 Feed data from the Apache Kafka and pushing it downstream.<br/>
 
 ```
 Open Sources Example: 
@@ -50,9 +57,11 @@ type StdNew struct {
 
 ### Step2: Data optimization and Organization ###
 
-1 Consume data from Apache Kafka
-2 Optimize data, using Redis filtering news to accomplish data deduplication.
-3 Create the data index and write into Elasticsearch
+<img width="275" height= "150" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part2.jpg"/>
+
+1 Consume data from Apache Kafka.<br/>
+2 Optimize data, using Redis filtering news to accomplish data deduplication.<br/>
+3 Create the data index and write into Elasticsearch.<br/>
 
 
 
@@ -60,9 +69,10 @@ type StdNew struct {
 
 
 ### Step3: Connect to Web service and Display ###
+<img width="275" height = "225" src="https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part3.jpg"/>
 
-1 Implement back-end interfaces for news retrieval, news recommendation, and news timeline count.
-2 Front-end developer is responsible for the UI design.
+1 Implement back-end interfaces for news retrieval, news recommendation, and news timeline count.<br/>
+2 Front-end developer is responsible for the UI design.<br/>
 
  
 
