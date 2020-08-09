@@ -17,13 +17,12 @@ func NewProducer(servers string) *kafka.Producer {
 }
 
 //Produce .
-func Produce(producer *kafka.Producer, topic string, key, data []byte) error {
+func Produce(producer *kafka.Producer, topic string, data []byte) error {
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 	err := producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Value:          data,
-		Key:            key,
 	}, deliveryChan)
 	if err != nil {
 		return nil
