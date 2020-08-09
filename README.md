@@ -29,9 +29,8 @@ Go/Golang || HTTP Service || Apche Kafka || Redis || Elasticsearch || Linux
 <img width="325" height= "225" src = "https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part1.jpg"/>
 
 1 Connect different open news sources with API service.<br/>
-2 Normalizing the data into a unified format. <br\>
-3 Feed data from the Apache Kafka and pushing it downstream.<br\>
-
+2 Normalizing the data into a unified format. <br/>
+3 Feed data from the Apache Kafka and pushing it downstream.<br/>
 ```
 Open Sources Example: 
 1. news API:          https://www.juhe.cn/docs/api/id/235
@@ -55,8 +54,8 @@ type StdNew struct {
 }
 ```
 #### References ###
-Kafka repository: https://github.com/confluentinc/confluent-kafka-go<br\>
-API Crawling:     https://www.tianapi.com/apiview/87<br\>
+Kafka repository: https://github.com/confluentinc/confluent-kafka-go<br/>
+API Crawling:     https://www.tianapi.com/apiview/87<br/>
 
 
 
