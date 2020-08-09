@@ -6,7 +6,7 @@ A Go Application combined API service, Apache Kafka, and Elasticsearch,  which h
 
 
 ### Process Diagram
-![image](https://github.com/ChAngLEx/Myproject/blob/master/image/process%20Diagram.jpg)
+
     
 
 
