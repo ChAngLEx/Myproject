@@ -54,6 +54,9 @@ type StdNew struct {
 	Types     []string `json:"types"`
 }
 ```
+#### References ###
+Kafka repository: https://github.com/confluentinc/confluent-kafka-go<br\>
+API Crawling:     https://www.tianapi.com/apiview/87<br\>
 
 
 
@@ -81,6 +84,12 @@ Others:
 
 
 ```
+
+#### References ###
+Redis repository:         https://godoc.org/github.com/gomodule/redigo/redis#pkg-index<br/>
+Elasticsearch repository: https://github.com/olivere/elastic<br/>
+Library:                  https://godoc.org/ <br/>
+
 
 
 
