@@ -86,7 +86,7 @@ Others:
 
 
 ### Step3: Connect to Web service and Display ###
-<img width="275" height = "225" src="https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part3.jpg"/>
+<img width="275" height = "175" src="https://github.com/ChAngLEx/Myproject/blob/master/image/process%20diagram%20part3.jpg"/>
 
 1 Implement back-end interfaces for news retrieval, news recommendation, and news timeline count.<br/>
 2 Front-end developer is responsible for the UI design.<br/>
