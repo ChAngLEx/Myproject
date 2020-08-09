@@ -1,119 +1,73 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
-	"strings"
+	"net/http"
 
-	"github.com/Shopify/sarama"
-
-	"github.com/olivere/elastic/v7"
+	"github.com/ChAngLEx/Myproject/common"
+	"github.com/garyburd/redigo/redis"
 )
 
-type Service struct {
-	AccessLogProducer sarama.AsyncProducer
-	Consumer          sarama.Consumer
-	Client            *elastic.Client
+var globalCount = 0
+
+//TODO isDupBloomfilter isDupSimhash
+func isDupMd5(news []byte, redisclient redis.Conn) bool {
+	has := md5.Sum(news)
+	key := fmt.Sprintf("%x", has) //将[]byte转成16进制
+	n, err := redisclient.Do("SETNX", key, "")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return n == int64(0)
 }
 
-var (
-	kafkaClient *KafkaClient
-)
-
-func initKafKa(addr string, topic string) (err error) {
-
-	kafkaClient = &KafkaClient{}
-
-	consumer, err := sarama.NewConsumer(strings.Split(addr, ","), nil)
+//ConsumeToES .
+func ConsumeToES() {
+	consumer := common.NewConsumer("localhost:9092", "chang", []string{"test"})
+	//esclient := common.NewESClient("localhost:9200")
+	redisclient, err := redis.Dial("tcp", "localhost:6379")
 	if err != nil {
-		logs.Error("Failed to strat consumer :", err)
-		return
+		fmt.Println(err.Error())
 	}
-
-	kafkaClient.client = consumer
-	kafkaClient.addr = addr
-	kafkaClient.topic = topic
-	return
-
+	for {
+		news, err := common.Consume(consumer)
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+		//去重 md5去重版
+		if isDupMd5(news, redisclient) {
+			continue
+		}
+		//写入ES
+		//esclient.Index("news").Type("_doc").Id(key).BodyJson(news).Do(context.Background())
+		globalCount++
+	}
 }
-
-var (
-	esClient *elastic.Client
-)
-
-func PullFromKafka() (err error) {
-	partitionList, err := kafkaClient.client.Partitions(kafkaClient.topic)
-	if err != nil {
-		logs.Error("ini failed ,err:%v", err)
-		fmt.Printf("ini failed ,err:%v", err)
-		return
+func main() {
+	//10个并发处理
+	for i := 0; i < 10; i++ {
+		go ConsumeToES()
 	}
-
-	for partition := range partitionList {
-		fmt.Println("for in")
-		pc, errRet := kafkaClient.client.ConsumePartition(kafkaClient.topic, int32(partition), sarama.OffsetNewest)
-		if errRet != nil {
-			err = errRet
-			logs.Error("Failed to start consumer for partition %d: %s\n", partition, err)
-			fmt.Printf("Failed to start consumer for partition %d: %s\n", partition, err)
+	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(w, `405`)
 			return
 		}
-		defer pc.AsyncClose()
-
-		kafkaClient.wg.Add(1)
-		go func(pc sarama.PartitionConsumer) {
-
-			for msg := range pc.Messages() {
-
-				logs.Debug("Partition:%d,Offset:%d,key:%s,value:%s", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
-				//fmt.Println()
-				err = sendToES(kafkaClient.topic, msg.Value)
-				if err != nil {
-					logs.Warn("send to es failed,err:%v", err)
-				}
-			}
-			kafkaClient.wg.Done()
-		}(pc)
-
-	}
-
-	kafkaClient.wg.Wait()
-	return
-}
-
-// initial ES
-func initES(addr string) (err error) {
-
-	client, err := elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(addr))
-	if err != nil {
-		fmt.Println("connect es error", err)
-		return
-	}
-	esClient = client
-
-	return
-}
-
-func sendToES(body, []byte) error {
-	ctx := context.Backgroud()
-
-	//topic structure need be defined?
-	put, err = esClient.Index().
-		Index(topic).
-		Type(topic).
-		BodyJson(body).
-		Do(ctx)
-	if err != nil {
-
-		panic(err)
-	}
-
-	fmt.Println("Indexed log %s to index %s, type %s\n", put.Id, put.Index, put.Type)
-
-	// index need a structure...
-	_, err = esClient.Flush().Index("").Do(ctx)
-	if err != nil {
-		panic(err)
-
-	}
-	return nil
+		//laklahalfhajfkalgdhf
+		fmt.Fprintf(w, `pong`)
+	})
+	http.HandleFunc("/statinfo", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(w, `405`)
+			return
+		}
+		//laklahalfhajfkalgdhf
+		fmt.Fprintf(w, `%d`, globalCount)
+	})
+	http.ListenAndServe(":8081", nil)
 }

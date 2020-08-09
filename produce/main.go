@@ -160,20 +160,32 @@ func PushToKafka(new StdNew) {
 	}
 }
 
+func PullAllAPI() []common.StdNews {
+	return nil
+}
+func ProduceToKafka() {
+	// for {
+	// 	//NewProducer
+	// 	//PullAllAPI()
+	// 	//写入kafka
+	// }
+}
 func main() {
-	ch := make(chan StdNew, 1024) //带buffer的channel不阻塞生产和消费
-	CallAPI(ch)                   //生产原始数据
-	//TODO 改成循环CallAPI
-
-	/*for i := 0; i < 10; i++ {
-		CallAPI(ch)
-	}
+	// ch := make(chan StdNew, 1024) //带buffer的channel不阻塞生产和消费
+	// CallAPI(ch)                   //生产原始数据
 	for i := 0; i < 10; i++ {
-		<-ch
-	}*/
-
-	//TODO 实现从ch中读数据，并调用PushToKafka
-
+		go ProduceToKafka()
+	}
+	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(w, `405`)
+			return
+		}
+		//laklahalfhajfkalgdhf
+		fmt.Fprintf(w, `pong`)
+	})
+	http.ListenAndServe(":80", nil)
 }
 
 func fetch(srcinfo NewsSource) ([]StdNew, error) {
