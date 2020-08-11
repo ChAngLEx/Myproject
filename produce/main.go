@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/ChAngLEx/Myproject/common"
@@ -83,17 +84,27 @@ func GeneralNews2StdNew(generalnews []byte) ([]common.StdNew, error) {
 	return ret, nil
 }
 
+var dataCount = 0
+
 func PullAllAPI() []common.StdNew {
-	for _, srcinfo := range sources {
-		results, _ := fetch(srcinfo)
-
-		for i := range results {
-			//fmt.Println("%v", results[i])
-			ProduceToKafka(results[i])
-			log.Printf("%v", results[i])
-
-		}
+	start := time.Now()
+	wg := sync.WaitGroup{}
+	for srcname, srcinfo := range sources {
+		wg.Add(1)
+		go func(srcname string, srcinfo common.NewsSource) {
+			log.Printf("name:%s\turl:%s\n", srcname, srcinfo.URL)
+			results, _ := fetch(srcinfo)
+			for i := range results {
+				fmt.Println("%v", results[i])
+				ProduceToKafka(results[i])
+				dataCount++
+				log.Printf("%v", results[i])
+			}
+			wg.Done()
+		}(srcname, srcinfo)
 	}
+	wg.Wait()
+	log.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
 	return nil
 
 }
@@ -102,13 +113,15 @@ func PullAllAPI() []common.StdNew {
 func ProduceToKafka(news common.StdNew) {
 	producer := common.NewProducer("localhost:9092")
 
-	value, _ := json.Marshal(news)
+	for {
+		value, _ := json.Marshal(news)
+		err := common.Produce(producer, "test", nil, []byte(value))
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println("send success")
+		}
 
-	err := common.Produce(producer, "test", nil, []byte(value))
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		fmt.Println("send success")
 	}
 
 }
@@ -129,16 +142,27 @@ func main() {
 	})
 	http.ListenAndServe(":80", nil)
 
+	http.HandleFunc("/statinfo", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(w, `405`)
+			return
+		}
+		//laklahalfhajfkalgdhf
+		fmt.Fprintf(w, `%d`, dataCount)
+	})
+	http.ListenAndServe(":8081", nil)
+
 }
 
 func fetch(srcinfo common.NewsSource) ([]common.StdNew, error) {
-	//start := time.Now()
+	start := time.Now()
 	res, err := http.Get(srcinfo.URL)
 	if err != nil {
 
 	}
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body) //TODO 把这个数据存到文件里，因为只有1000次免费调用
-	//log.Printf("%s cost:%f\n", srcinfo.URL, time.Since(start).Seconds())
+	log.Printf("%s cost:%f\n", srcinfo.URL, time.Since(start).Seconds())
 	return srcinfo.Parse(body)
 }

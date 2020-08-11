@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"fmt"
 	"net/http"
 
 	"github.com/ChAngLEx/Myproject/common"
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 var globalCount = 0
@@ -26,7 +27,7 @@ func isDupMd5(news []byte, redisclient redis.Conn) bool {
 //ConsumeToES .
 func ConsumeToES() {
 	consumer := common.NewConsumer("localhost:9092", "chang", []string{"test"})
-	//esclient := common.NewESClient("localhost:9200")
+	esclient := common.NewESClient("localhost:9200")
 	redisclient, err := redis.Dial("tcp", "localhost:6379")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -42,7 +43,7 @@ func ConsumeToES() {
 			continue
 		}
 		//写入ES
-		//esclient.Index("news").Type("_doc").Id(key).BodyJson(news).Do(context.Background())
+		esclient.Index().Type("_doc").BodyJson(news).Do(context.Background())
 		globalCount++
 	}
 }
